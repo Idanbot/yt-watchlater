@@ -935,10 +935,9 @@ def main() -> None:
     html_rows = extract_html_rows(html)
     html_df = pl.DataFrame(html_rows)
 
+    sample = [r["videoId"] for r in html_rows[:3] if r.get("videoId")]
     probe = {
-        "unwatched_first": probe_video(html, "9I-566iUB7M"),
-        "watched_with_t": probe_video(html, "dXglTsXGOBE"),
-        "watched_no_t": probe_video(html, "hERLVpegJrw"),
+        "sample": [probe_video(html, vid) for vid in sample],
         "html_video_blocks": len(html_rows),
         "html_has_percentDurationWatched": "percentDurationWatched" in html,
         "html_has_startTimeSeconds": "startTimeSeconds" in html,
@@ -1425,9 +1424,7 @@ def main() -> None:
             easy_n=easy_remove.height,
         ),
         "probe": {
-            "firstVideoUnwatched": probe["unwatched_first"],
-            "watchedWithResumeT": probe["watched_with_t"],
-            "watchedNoT": probe["watched_no_t"],
+            "sample": probe.get("sample", []),
             "htmlSignalsPresent": {
                 "percentDurationWatched": probe["html_has_percentDurationWatched"],
                 "startTimeSeconds": probe["html_has_startTimeSeconds"],
@@ -1455,16 +1452,6 @@ def main() -> None:
     md.append("")
     md.append("JSONL has: position, videoId, title, url, channel, duration, category, subCategory.")
     md.append("")
-    p1 = probe["unwatched_first"]
-    p2 = probe["watched_with_t"]
-    p3 = probe["watched_no_t"]
-    md.append(f"Probe `9I-566iUB7M` (pos 1): watched={p1.get('watched')}, views={p1.get('viewsText')}, ago={p1.get('publishedAgo')}, handle={p1.get('channelHandle')}. No resume.")
-    md.append("")
-    md.append(f"Probe `dXglTsXGOBE`: watched={p2.get('watched')}, jsonPercent={p2.get('jsonWatchedPercent')}, startTimeSeconds={p2.get('jsonStartSeconds')}, views={p2.get('viewsText')}, ago={p2.get('publishedAgo')}. DOM resume renderer has empty style; percent lives in embedded `ytInitialData` (`percentDurationWatched`) for the first page only ({insights['watchState']['jsonPercentRows']} videos), plus DOM `&t=` / overlay for the rest.")
-    md.append("")
-    md.append(f"Probe `hERLVpegJrw`: watched={p3.get('watched')}, jsonPercent={p3.get('jsonWatchedPercent')} (100% WATCHED often omits `&t=`).")
-    md.append("")
-    md.append("Also extracted for all 3834 DOM rows: views, publishedAgo, channelHandle, thumbnailUrl, htmlIndex, WATCHED overlay.")
     md.append("")
     md.append("## Easy removals (priority ≤ 3)")
     md.append("")
