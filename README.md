@@ -31,10 +31,6 @@ cd web && npm run data && npm run dev
 
 `analyze.py` is optional. The app works on a bare userscript export.
 
-## Deploy
-
-GitHub Pages builds `web/` on push to `main`. Set `GITHUB_PAGES=1` so the Vite base is `/yt-watchlater/`.
-
 ## Privacy
 
 Do not commit playlist dumps, HTML captures, or generated `videos.jsonl` / `insights.json`. Those paths are gitignored.
