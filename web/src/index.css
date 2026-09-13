@@ -387,7 +387,7 @@ body::after {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-rows: auto auto auto auto 1fr;
+  grid-template-rows: auto auto auto auto auto 1fr;
   height: 100%;
   animation: rise 0.7s var(--ease) both;
 }
@@ -468,6 +468,7 @@ body::after {
   min-width: min(100%, 240px);
 }
 
+.search-panel,
 .filters {
   margin: 0 16px;
   display: grid;
@@ -475,9 +476,19 @@ body::after {
   transition: grid-template-rows 0.35s var(--ease);
 }
 
+.search-panel.open,
 .filters.open { grid-template-rows: 1fr; }
 
+.search-panel-inner,
 .filters-inner { overflow: hidden; }
+
+.search-panel-inner {
+  padding: 0 0 8px;
+}
+.search-panel-inner .field.search {
+  width: 100%;
+  min-width: 0;
+}
 
 .seg {
   display: flex;
@@ -844,6 +855,9 @@ body::after {
   position: relative;
   background: var(--thumb-bg);
   box-shadow: inset 0 0 0 1px var(--inset);
+  color: inherit;
+  text-decoration: none;
+  display: block;
 }
 
 .thumb-wrap img {
@@ -1163,7 +1177,8 @@ a.pill {
   .chrome,
   .toolbar,
   .stats,
-  .filters {
+  .filters,
+  .search-panel {
     margin-left: 8px;
     margin-right: 8px;
   }
@@ -1182,7 +1197,8 @@ a.pill {
   .chrome input[type="text"],
   .toolbar input,
   .toolbar select,
-  .triage input {
+  .triage input,
+  .search-panel input {
     font-size: 16px;
     min-height: 44px;
   }

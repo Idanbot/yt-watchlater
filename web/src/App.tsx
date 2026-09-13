@@ -142,6 +142,12 @@ export default function App() {
     } catch {}
     return loadViewPrefs().filtersOpen
   })
+  const [searchOpen, setSearchOpen] = useState(() => {
+    try {
+      if (window.matchMedia("(max-width: 720px)").matches) return false
+    } catch {}
+    return true
+  })
   const [scheme, setScheme] = useState<ColorScheme>(() => loadViewPrefs().scheme)
   const [fontScale, setFontScale] = useState(() => loadViewPrefs().fontScale)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -153,6 +159,7 @@ export default function App() {
   const [narrow, setNarrow] = useState(false)
   const parentRef = useRef<HTMLDivElement>(null)
   const importRef = useRef<HTMLInputElement>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const stored = loadPlaylist()
@@ -190,6 +197,10 @@ export default function App() {
   useEffect(() => {
     saveViewPrefs({ view, thumb, filtersOpen, scheme, fontScale })
   }, [view, thumb, filtersOpen, scheme, fontScale])
+
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus()
+  }, [searchOpen])
 
   useEffect(() => {
     const root = document.documentElement
@@ -588,15 +599,6 @@ export default function App() {
       </header>
 
       <div className="chrome">
-        <label className="field search">
-          search
-          <input
-            type="search"
-            placeholder="title, channel, id…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </label>
         <div className="chrome-right">
           <div className="seg" role="group" aria-label="screen">
             <button
@@ -644,7 +646,16 @@ export default function App() {
               </div>
               <button
                 type="button"
+                className={`pill${searchOpen ? " on" : ""}`}
+                aria-expanded={searchOpen}
+                onClick={() => setSearchOpen((o) => !o)}
+              >
+                search{q ? ` · ${q.length > 16 ? `${q.slice(0, 16)}…` : q}` : ""}
+              </button>
+              <button
+                type="button"
                 className={`pill${filtersOpen ? " on" : ""}`}
+                aria-expanded={filtersOpen}
                 onClick={() => setFiltersOpen((o) => !o)}
               >
                 filters{filterCount ? ` · ${filterCount}` : ""}
@@ -691,6 +702,21 @@ export default function App() {
         <Analytics videos={videos} onApply={applyInsightFilter} />
       ) : (
         <>
+      <div className={`search-panel${searchOpen ? " open" : ""}`}>
+        <div className="search-panel-inner">
+          <label className="field search">
+            search
+            <input
+              ref={searchRef}
+              type="search"
+              placeholder="title, channel, id…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </label>
+        </div>
+      </div>
+
 
       <div className={`filters${filtersOpen ? " open" : ""}`}>
         <div className="filters-inner">
@@ -1141,8 +1167,14 @@ function VideoTile({
 }) {
   return (
     <div className={layout === "list" ? "row-inner" : "card-inner"}>
-      <div className="thumb-wrap">
-        {v.availability === "ok" ? (
+      {v.availability === "ok" ? (
+        <a
+          className="thumb-wrap"
+          href={watchUrl(v.videoId, v.resumeSeconds)}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`Watch ${v.title}`}
+        >
           <img
             src={thumbUrl(v.videoId, thumb)}
             alt=""
@@ -1152,19 +1184,21 @@ function VideoTile({
               e.currentTarget.style.display = "none"
             }}
           />
-        ) : (
+          <span className="play" aria-hidden>
+            ▶
+          </span>
+          {v.watchedPercent != null ? (
+            <i
+              className="thumb-bar"
+              style={{ width: `${Math.min(100, v.watchedPercent)}%` }}
+            />
+          ) : null}
+        </a>
+      ) : (
+        <div className="thumb-wrap">
           <div className="ph">{v.availability}</div>
-        )}
-        <span className="play" aria-hidden>
-          ▶
-        </span>
-        {v.watchedPercent != null ? (
-          <i
-            className="thumb-bar"
-            style={{ width: `${Math.min(100, v.watchedPercent)}%` }}
-          />
-        ) : null}
-      </div>
+        </div>
+      )}
       <div className="meta">
         <h2 dir="auto">
           <a
