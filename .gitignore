@@ -1,0 +1,25 @@
+node_modules
+web/node_modules
+web/dist
+dist
+.DS_Store
+*.log
+.env
+.env.*
+.python-version
+__pycache__/
+.venv/
+uv.lock
+
+# Personal watch-later dumps and derived analytics
+raw-html-body.txt
+youtube_watch_later_categorized.jsonl
+youtube_watch_later_triage.jsonl
+out/
+web/public/videos.jsonl
+web/public/insights.json
+
+# Session planning notes (contain list specifics)
+task_plan.md
+progress.md
+findings.md
