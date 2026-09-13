@@ -115,7 +115,7 @@ export function Analytics({
   const pieKeys = Object.keys(PIE_TITLES).filter((k) => data.pies[k]?.length)
 
   return (
-    <section className="analytics">
+    <main className="analytics">
       <div className="analytics-head">
         <h2>Insights</h2>
         <div className="seg" role="group" aria-label="pie metric">
@@ -158,6 +158,6 @@ export function Analytics({
           </article>
         ))}
       </div>
-    </section>
+    </main>
   )
 }

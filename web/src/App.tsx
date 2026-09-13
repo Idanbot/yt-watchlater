@@ -136,7 +136,12 @@ export default function App() {
   const [groupBy, setGroupBy] = useState<GroupBy>("none")
   const [view, setView] = useState<ViewMode>(() => loadViewPrefs().view)
   const [thumb, setThumb] = useState<ThumbSize>(() => loadViewPrefs().thumb)
-  const [filtersOpen, setFiltersOpen] = useState(() => loadViewPrefs().filtersOpen)
+  const [filtersOpen, setFiltersOpen] = useState(() => {
+    try {
+      if (window.matchMedia("(max-width: 720px)").matches) return false
+    } catch {}
+    return loadViewPrefs().filtersOpen
+  })
   const [scheme, setScheme] = useState<ColorScheme>(() => loadViewPrefs().scheme)
   const [fontScale, setFontScale] = useState(() => loadViewPrefs().fontScale)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -145,6 +150,7 @@ export default function App() {
   const [copied, setCopied] = useState("")
   const [removedIds, setRemovedIds] = useState<string[]>(() => loadRemovedIds())
   const [showRemoved, setShowRemoved] = useState(false)
+  const [narrow, setNarrow] = useState(false)
   const parentRef = useRef<HTMLDivElement>(null)
   const importRef = useRef<HTMLInputElement>(null)
 
@@ -163,6 +169,14 @@ export default function App() {
         if (rows.length) setVideos(rows)
       })
       .catch((e: Error) => setError(e.message))
+  }, [])
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 720px)")
+    const sync = () => setNarrow(mq.matches)
+    sync()
+    mq.addEventListener("change", sync)
+    return () => mq.removeEventListener("change", sync)
   }, [])
 
   useEffect(() => {
@@ -326,14 +340,14 @@ export default function App() {
     estimateSize: (i) => {
       const item = packed[i]
       if (!item || item.kind === "group") return 40
-      if (item.kind === "list") return LIST_H[thumb]
+      if (item.kind === "list") return LIST_H[thumb] + (narrow ? 80 : 0)
       return GRID_H[thumb]
     },
     overscan: 8,
   })
   useEffect(() => {
     virtualizer.measure()
-  }, [view, thumb, cols, packed.length])
+  }, [view, thumb, cols, packed.length, narrow])
 
   const shownHours = hours(
     sorted.reduce((s, v) => s + (v.durationSeconds ?? 0), 0),
@@ -939,7 +953,7 @@ export default function App() {
         />
       </div>
 
-      <div
+      <main
         className="list"
         ref={parentRef}
         data-view={view}
@@ -1012,7 +1026,7 @@ export default function App() {
             )
           })}
         </div>
-      </div>
+      </main>
         </>
       )}
       {settingsOpen && (

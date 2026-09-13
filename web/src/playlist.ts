@@ -139,6 +139,16 @@ export function parseJsonl(text: string): Record<string, unknown>[] {
 export function parsePlaylistText(text: string): Video[] {
   const trimmed = text.trim()
   if (!trimmed) return []
+  const lines = trimmed.split("\n").map((l) => l.trim()).filter(Boolean)
+  if (lines.length > 1 && lines[0].startsWith("{") && !trimmed.startsWith("[")) {
+    try {
+      return parseJsonl(trimmed)
+        .map((row, i) => normalizeVideo(row, i))
+        .filter((v): v is Video => v != null)
+    } catch {
+      /* fall through to single JSON */
+    }
+  }
   if (trimmed.startsWith("[")) {
     const arr = JSON.parse(trimmed) as unknown
     if (!Array.isArray(arr)) return []
